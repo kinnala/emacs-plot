@@ -1,11 +1,6 @@
 (require 'svg)
-(setq svg (svg-create 300 200 :stroke "blue"))
-(svg-line svg 0 0 500 40)
-(svg-insert-image svg)
 (require 'dash)
 (require 'org-plot)
-
-(plot/plot (-zip (number-sequence 0 6 0.1) (-map (lambda (x) (sin (* 2 x))) (number-sequence 0 6 0.1))))
 
 (defun org-plot/svg ()
   (interactive)
@@ -13,10 +8,8 @@
   (let* ((table (org-table-to-lisp))
          (x (-map 'string-to-number (-map 'car table)))
          (y (-map 'string-to-number (-map 'cadr table))))
-    ;(kill-buffer "*org-plot*")
     (pop-to-buffer "*org-plot*" nil)
-    (plot/plot (-zip x y))
-    (special-mode)))
+    (plot/plot (-zip x y))))
 
 (defun plot/plot (points)
   (let* ((svg (svg-create 400 250))
@@ -25,6 +18,10 @@
          (height 250))
     (plot/scatter-pixel svg rad (plot/point-to-pixel width height points))
     (svg-insert-image svg)))
+
+(defun plot/fun (fun xmin xmax dx)
+  (let* ((points (number-sequence xmin xmax dx)))
+    (plot/plot (-zip points (-map fun points)))))
 
 (defun plot/point-to-pixel (width height points)
   (let* ((xs (-map (lambda (z) (car z)) points))
@@ -43,4 +40,6 @@
   (-map (lambda (y) (svg-circle svg (car y) (cdr y) rad)) points))
 
 
+(plot/plot (-zip (number-sequence 0 6 0.1) (-map (lambda (x) (sin (* 2 x))) (number-sequence 0 6 0.1))))
     
+(plot/fun (lambda (x) (* x x)) 0 2 0.1)
